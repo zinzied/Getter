@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 import requests
 import threading
+import time
 
 class Application(tk.Frame):
     def __init__(self, master=None):
@@ -27,6 +28,13 @@ class Application(tk.Frame):
 
         self.gets_entry = tk.Entry(self)
         self.gets_entry.pack(side="top")
+
+        self.delay_label = tk.Label(self)
+        self.delay_label["text"] = "Delay (ms):"
+        self.delay_label.pack(side="top")
+
+        self.delay_entry = tk.Entry(self)
+        self.delay_entry.pack(side="top")
 
         self.start_button = tk.Button(self)
         self.start_button["text"] = "Start"
@@ -65,6 +73,7 @@ class Application(tk.Frame):
     def send_gets(self):
         url = self.url_entry.get()
         num_gets = int(self.gets_entry.get())
+        delay = int(self.delay_entry.get())
         for i in range(num_gets):
             try:
                 response = requests.get(url)
@@ -80,6 +89,7 @@ class Application(tk.Frame):
                 self.errors += 1
                 self.errors_label["text"] = f"Errors: {self.errors}"
                 self.log(f"GET {url} failed: {e}")
+            time.sleep(delay / 1000)
         self.running = False
 
     def log(self, message):
