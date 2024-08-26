@@ -3,6 +3,7 @@ from tkinter import messagebox
 import requests
 import threading
 import time
+from urllib.parse import urlparse
 
 class Application(tk.Frame):
     def __init__(self, master=None):
@@ -35,6 +36,13 @@ class Application(tk.Frame):
 
         self.delay_entry = tk.Entry(self)
         self.delay_entry.pack(side="top")
+
+        self.port_label = tk.Label(self)
+        self.port_label["text"] = "Port (optional):"
+        self.port_label.pack(side="top")
+
+        self.port_entry = tk.Entry(self)
+        self.port_entry.pack(side="top")
 
         self.start_button = tk.Button(self)
         self.start_button["text"] = "Start"
@@ -74,21 +82,35 @@ class Application(tk.Frame):
         url = self.url_entry.get()
         num_gets = int(self.gets_entry.get())
         delay = int(self.delay_entry.get())
+        port = self.port_entry.get()
+        parsed_url = urlparse(url)
+        ip = parsed_url.hostname
+        if port:
+            port = int(port)
+        else:
+            port = parsed_url.port if parsed_url.port else 80 if parsed_url.scheme == 'http' else 443
+
         for i in range(num_gets):
             try:
-                response = requests.get(url)
+                # Construct the URL with the specified port
+                if port:
+                    url_with_port = f"{parsed_url.scheme}://{ip}:{port}{parsed_url.path}"
+                else:
+                    url_with_port = url
+
+                response = requests.get(url_with_port)
                 if response.status_code == 200:
                     self.successful_gets += 1
                     self.successful_gets_label["text"] = f"Successful GETs: {self.successful_gets}"
-                    self.log(f"GET {url} successful ({response.status_code})")
+                    self.log(f"GET {url_with_port} successful ({response.status_code}) from {ip}:{port}")
                 else:
                     self.errors += 1
                     self.errors_label["text"] = f"Errors: {self.errors}"
-                    self.log(f"GET {url} failed ({response.status_code})")
+                    self.log(f"GET {url_with_port} failed ({response.status_code}) from {ip}:{port}")
             except requests.exceptions.RequestException as e:
                 self.errors += 1
                 self.errors_label["text"] = f"Errors: {self.errors}"
-                self.log(f"GET {url} failed: {e}")
+                self.log(f"GET {url_with_port} failed: {e} from {ip}:{port}")
             time.sleep(delay / 1000)
         self.running = False
 
