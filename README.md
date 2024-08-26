@@ -63,5 +63,5 @@ Contributions are welcome! Please open an issue or submit a pull request for any
 
 ## Credit
 
-This project is Forked From joe-shenouda/Getter thanks to him to let me pull requests and make some changes on it . 
+This project is Forked From joe-shenouda/Getter Thanks to him for let me pull requests and make some changes on it . 
 ---
